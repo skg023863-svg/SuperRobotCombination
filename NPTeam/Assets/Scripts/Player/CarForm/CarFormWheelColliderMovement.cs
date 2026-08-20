@@ -18,22 +18,14 @@ public class CarFormWheelColliderMovement : NetworkBehaviour
         NetworkVariableReadPermission.Everyone, 
         NetworkVariableWritePermission.Owner);
     
-    
-    
     private NetworkVariable<float> _netHorizontalInput = new NetworkVariable<float>
         (0f, 
         NetworkVariableReadPermission.Everyone, 
         NetworkVariableWritePermission.Owner);
     
-    private NetworkVariable<float> _netVerticalInput = new NetworkVariable<float>(
-        0f, 
-        NetworkVariableReadPermission.Everyone, 
-        NetworkVariableWritePermission.Owner);
+    private float _brakeInput;
     
-    private NetworkVariable<float> _netBrakeInput = new NetworkVariable<float>(
-        0f, 
-        NetworkVariableReadPermission.Everyone, 
-        NetworkVariableWritePermission.Owner);
+    private float _verticalInput;
 
     public WheelCollider[] SteerWheel;
     public WheelCollider[] MotorWheel;
@@ -120,8 +112,8 @@ public class CarFormWheelColliderMovement : NetworkBehaviour
     void WheelControl()
     {
         float rot = SteerRot * _netHorizontalInput.Value;
-        float Torque = MotorTorque * _netVerticalInput.Value;
-        float Brake = BrakeTorque * _netBrakeInput.Value;
+        float Torque = MotorTorque * _verticalInput;
+        float Brake = BrakeTorque * _brakeInput;
 
         foreach (WheelCollider wheel in SteerWheel)
         {
@@ -174,7 +166,7 @@ public class CarFormWheelColliderMovement : NetworkBehaviour
          PlayerState.Instance.CurrentPossessed != _playerVehicle) return;
         Vector2 input = ctx.ReadValue<Vector2>();
         _netHorizontalInput.Value = input.x;
-        _netVerticalInput.Value = input.y;
+        _verticalInput = input.y;
 
         isMove.Value = Mathf.Abs(input.y) > 0.01f;
     }
@@ -184,6 +176,6 @@ public class CarFormWheelColliderMovement : NetworkBehaviour
         if (!IsOwner) return;
         if (PlayerState.Instance.IsPossession == false ||
          PlayerState.Instance.CurrentPossessed != _playerVehicle) return;
-        _netBrakeInput.Value = ctx.ReadValue<float>();
+        _brakeInput = ctx.ReadValue<float>();
     }
 }
